@@ -1,0 +1,98 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "linux-arm64-openssl-1.1.x", "rhel-openssl-3.0.x"]
+}
+
+model Server {
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  systemId           String
+  serverId           String
+  location           String
+  protocol           String
+  snapShot           String?
+  type               ServerType[]
+  dataCenter         String?
+  maxUserCount       Int
+  remainingUserCount String?
+  ip                 String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model User {
+  id               String              @id @default(auto()) @map("_id") @db.ObjectId
+  userName         String
+  password         String
+  firstName        String?
+  lastName         String?
+  email            String?             @unique
+  emailVerifiedAt  DateTime?
+  emailVerify      Boolean             @default(false)
+  devices          userDevice[]
+  createdAt        DateTime            @default(now())
+  isFree           Boolean?            @default(true)
+  purchases        purchaseHistory[]
+  isBlock          Boolean             @default(false)
+  emailVerifyToken emailVerifyToken
+  forgotPassword   forgotPasswordToken
+  load               String  
+}
+
+model SuperUser {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  systemId  String
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}
+
+type userDevice {
+  deviceSystemId String
+  deviceModel    String
+  androidId      String
+  osType         osType
+  osVersion      String
+  logIN          Boolean @default(false)
+}
+
+enum osType {
+  ANDROID
+  IOS
+}
+
+type purchaseHistory {
+  staticIp    Boolean
+  initialDate DateTime
+  expireDate  DateTime
+  plan        String
+  status      String
+}
+
+model jwtBlockList {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  username  String
+  token     String
+  createdAt DateTime @default(now())
+}
+
+type emailVerifyToken {
+  createdAt   DateTime @default(now())
+  verifyToken String
+}
+
+type forgotPasswordToken {
+  createdAt  DateTime @default(now())
+  resetToken String
+}
+
+enum ServerType{
+  FREE
+  STATIC
+  DYNAMIC
+}
+
